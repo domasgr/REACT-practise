@@ -1,6 +1,9 @@
 import React, { Component } from 'react';
 import TodoItem from './TodoItem';
 import { connect } from 'react-redux';
+import {addTodo, removeTodo} from "./actionCreators"
+import {Route} from 'react-router-dom';
+import TodoForm from './TodoForm';
 
 class TodoList extends Component {
   constructor(props){
@@ -9,39 +12,17 @@ class TodoList extends Component {
         task: ""
       }
     
-    this.handleSubmit = this.handleSubmit.bind(this);
-    this.handleChange = this.handleChange.bind(this);
-    this.handleRemove = this.handleRemove.bind(this);
-    
+    this.handleAdd = this.handleAdd.bind(this);
   }
-  handleSubmit(e){
-    
-    //debugger;
-    e.preventDefault();
-    this.props.dispatch({
-      type: 'ADD_TODO',
-      task: this.state.task
-    })
-    this.setState(
-      {task: ""}
-    )
-    //e.target.reset();
-      //debugger;
-    
-  }
-  handleChange(e){
-    this.setState({
-      task: [e.target.value]
-    })
+  handleAdd(val){
+    this.props.addTodo(val)
   }
   handleRemove(id){
-    this.props.dispatch({
-      type: 'REMOVE_TODO',
-      id
-    })
+    this.props.removeTodo(id);
     
   }
   render(){
+    
     const todos = this.props.todos.map((todo, i) =>(
             <TodoItem removeTodo={
               this.handleRemove.bind(this, todo.id)} 
@@ -51,15 +32,11 @@ class TodoList extends Component {
     
     return (
       <div>
-        <form onSubmit={this.handleSubmit}>
-            <input type='text' value={this.state.task} name='task' onChange={this.handleChange}/>
-            <button>Add</button>
-        </form>
-        <ul>
-          
-          {todos}
-        </ul>
-    </div>
+        <Route path='/todos/new' component={props=>(
+          <TodoForm {...props} handleSubmit={this.handleAdd}/>
+        )}/>
+        <Route exact path='/todos' component={() => <div><ul>{todos}</ul></div>}/>
+      </div>
     );
   }
 }
@@ -70,5 +47,14 @@ function mapStateToProps(reduxState){
     id: reduxState.id
   }
 }
-
-export default connect(mapStateToProps)(TodoList);
+// function mapDispatchToProps(dispatch){
+//   return{
+//     addTodo: function(task){
+//       dispatch({
+//         type: 'ADD_TODO',
+//         task
+//       });
+//     }
+//   }
+// }
+export default connect(mapStateToProps, {addTodo, removeTodo})(TodoList);
